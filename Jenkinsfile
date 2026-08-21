@@ -31,6 +31,22 @@ pipeline {
             }
         }
 
+        stage('Docker Build') {
+            steps {
+                sh '''
+                docker build -t microservice-demo:v1 .
+                '''
+            }
+        }
+
+        stage('Trivy Scan') {
+            steps {
+                sh '''
+                trivy image --severity HIGH,CRITICAL microservice-demo:v1
+                '''
+            }
+        }
+
         stage('Run Application') {
             steps {
                 sh '''
