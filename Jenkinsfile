@@ -25,6 +25,12 @@ pipeline {
             }
         }
 
+        stage('Upload Artifact to Nexus') {
+            steps {
+                sh 'mvn deploy'
+            }
+        }
+
         stage('Run Application') {
             steps {
                 sh '''
