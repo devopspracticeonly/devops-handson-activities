@@ -8,13 +8,6 @@ pipeline {
 
     stages {
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                url: 'https://github.com/devopspracticeonly/devops-handson-practice.git'
-            }
-        }
-
         stage('Build') {
             steps {
                 sh 'mvn clean package'
@@ -26,8 +19,7 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                     mvn sonar:sonar \
-                    -Dsonar.projectKey=microservice-demo \
-                    -Dsonar.host.url=http://<sonarqube-ip>:9000
+                    -Dsonar.projectKey=devops-handson-activities
                     '''
                 }
             }
@@ -39,6 +31,15 @@ pipeline {
                 nohup java -jar target/*.jar > app.log 2>&1 &
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
