@@ -1,4 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.agco.demo</groupId>
@@ -32,8 +36,14 @@
         </repository>
     </distributionManagement>
 
+    <properties>
+        <nexus.username>admin</nexus.username>
+        <nexus.password>Rpp@1908</nexus.password>
+    </properties>
+
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -42,7 +52,10 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.2.0.4988</version>
             </plugin>
+
         </plugins>
     </build>
+
 </project>
