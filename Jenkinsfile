@@ -11,9 +11,6 @@ pipeline {
 
         ECR_REPO = 'microservice-demo'
         ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
-
-        ECS_CLUSTER = 'microservice-cluster'
-        ECS_SERVICE = 'microservice-task-service'
     }
 
     stages {
@@ -105,20 +102,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Deploy To ECS') {
-            steps {
-                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    sh '''
-                    aws ecs update-service \
-                    --cluster $ECS_CLUSTER \
-                    --service $ECS_SERVICE \
-                    --force-new-deployment \
-                    --region $AWS_REGION
-                    '''
-                }
-            }
-        }
     }
 
     post {
@@ -128,7 +111,7 @@ pipeline {
         }
 
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'Docker image pushed successfully to ECR.'
         }
 
         unstable {
