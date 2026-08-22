@@ -1,5 +1,4 @@
 pipeline {
-
     agent any
 
     tools {
@@ -10,58 +9,71 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean package'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'mvn clean package'
+                }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh '''
-                    mvn sonar:sonar \
-                    -Dsonar.projectKey=devops-handson-activities
-                    '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    withSonarQubeEnv('SonarQube') {
+                        sh '''
+                            mvn sonar:sonar \
+                            -Dsonar.projectKey=devops-handson-activities
+                        '''
+                    }
                 }
             }
         }
 
         stage('Upload Artifact to Nexus') {
             steps {
-                sh 'mvn deploy'
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'mvn deploy'
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh '''
-                docker build -t microservice-demo:v1 .
-                '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'docker build -t microservice-demo:v1 .'
+                }
             }
         }
 
         stage('Trivy Scan') {
             steps {
-                sh '''
-                trivy image --severity HIGH,CRITICAL microservice-demo:v1
-                '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh 'trivy image --severity HIGH,CRITICAL microservice-demo:v1'
+                }
             }
         }
 
         stage('Run Application') {
             steps {
-                sh '''
-                nohup java -jar target/*.jar > app.log 2>&1 &
-                '''
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh '''
+                        nohup java -jar target/*.jar > app.log 2>&1 &
+                    '''
+                }
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline completed successfully!'
+        always {
+            echo 'Pipeline execution completed.'
         }
-        failure {
-            echo 'Pipeline failed!'
+
+        success {
+            echo 'All stages passed.'
+        }
+
+        unsuccessful {
+            echo 'One or more stages failed, but pipeline continued.'
         }
     }
 }
