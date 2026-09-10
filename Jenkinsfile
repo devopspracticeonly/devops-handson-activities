@@ -5,13 +5,33 @@ pipeline {
         maven 'maven'
     }
 
-    environment {
-        AWS_REGION = 'us-east-1'
-        ACCOUNT_ID = '702147744538'
-
-        ECR_REPO = 'microservice-demo'
-        ECR_URI = "${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO}"
-    }
+	parameters {
+		string(
+			name: 'AWS_REGION',
+			defaultValue: 'us-east-1',
+			description: 'AWS Region'
+		)
+	
+		string(
+			name: 'ACCOUNT_ID',
+			defaultValue: '702147744538',
+			description: 'AWS Account ID'
+		)
+	
+		string(
+			name: 'ECR_REPO',
+			defaultValue: 'microservice-demo',
+			description: 'ECR Repository'
+		)
+	}
+	
+	environment {
+		AWS_REGION = "${params.AWS_REGION}"
+		ACCOUNT_ID = "${params.ACCOUNT_ID}"
+		ECR_REPO   = "${params.ECR_REPO}"
+	
+		ECR_URI = "${params.ACCOUNT_ID}.dkr.ecr.${params.AWS_REGION}.amazonaws.com/${params.ECR_REPO}"
+	}
 
     stages {
 
