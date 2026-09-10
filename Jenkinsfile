@@ -8,13 +8,13 @@ pipeline {
 	parameters {
 		string(
 			name: 'AWS_REGION',
-			defaultValue: 'us-east-1',
+			defaultValue: 'ap-south-1',
 			description: 'AWS Region'
 		)
 	
 		string(
 			name: 'ACCOUNT_ID',
-			defaultValue: '702147744538',
+			defaultValue: '736865445725',
 			description: 'AWS Account ID'
 		)
 	
