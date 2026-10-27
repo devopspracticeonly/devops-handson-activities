@@ -1,8 +1,18 @@
-FROM nginx:latest
+FROM python:3.12-slim
 
-COPY . /usr/share/nginx/html
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-EXPOSE 80
+WORKDIR /app
 
-CMD ["nginx", "-g", "daemon off;"]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
+COPY app.py .
+
+RUN useradd --create-home --uid 10001 appuser
+USER 10001
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
