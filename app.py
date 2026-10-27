@@ -1,25 +1,43 @@
 import os
-
 import boto3
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
-REGION = os.getenv("AWS_REGION", "ap-south-1")
+REGION = os.getenv("AWS_REGION", "us-east-1")
 MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
+ROLE_ARN = os.getenv("ASSUME_ROLE_ARN", "arn:aws:iam::736865445725:instance-profile/admin-access-role")  # optional: pass in docker run if you want to assume another role
 
-bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+# Create STS client
+sts = boto3.client("sts", region_name=REGION)
+
+# Decide how to authenticate
+if ROLE_ARN:
+    # Explicitly assume another role
+    creds = sts.assume_role(
+        RoleArn=ROLE_ARN,
+        RoleSessionName="bedrock-session"
+    )["Credentials"]
+
+    bedrock = boto3.client(
+        "bedrock-runtime",
+        region_name=REGION,
+        aws_access_key_id=creds["AccessKeyId"],
+        aws_secret_access_key=creds["SecretAccessKey"],
+        aws_session_token=creds["SessionToken"]
+    )
+else:
+    # Default: use EC2 instance role or environment variables
+    bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+
 app = FastAPI(title="Bedrock AI Agent")
-
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
 
-
 @app.get("/health")
 def health():
     return {"status": "healthy"}
-
 
 @app.get("/", response_class=HTMLResponse)
 def home():
@@ -72,7 +90,6 @@ def home():
     </html>
     """
 
-
 @app.post("/chat")
 def chat(request: ChatRequest):
     try:
@@ -91,8 +108,8 @@ def chat(request: ChatRequest):
             for block in response["output"]["message"]["content"]
         )
         return {"answer": answer}
-    except Exception:
+    except Exception as e:
         raise HTTPException(
             status_code=502,
-            detail="Bedrock request failed. Check model access and pod logs.",
+            detail=f"Bedrock request failed: {str(e)}"
         )
