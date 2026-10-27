@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 REGION = os.getenv("AWS_REGION", "us-east-1")
 MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "amazon.nova-lite-v1:0")
-ROLE_ARN = os.getenv("ASSUME_ROLE_ARN", "arn:aws:iam::736865445725:instance-profile/admin-access-role")  # optional: pass in docker run if you want to assume another role
+ROLE_ARN = os.getenv("ASSUME_ROLE_ARN", "arn:aws:iam::736865445725:role/admin-access-role")  # optional: pass in docker run if you want to assume another role
 
 # Create STS client
 sts = boto3.client("sts", region_name=REGION)
